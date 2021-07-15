@@ -1,6 +1,5 @@
 package nextstep.subway.line.domain;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -68,6 +67,11 @@ public class Line extends BaseEntity {
 
     public void addLineStation(Station upStation, Station downStation, int distance) {
         List<Station> stations = getStations();
+        Section section = new Section(this, upStation, downStation, distance);
+        if (stations.isEmpty()) {
+            sections.add(section);
+            return;
+        }
         boolean isUpStationExisted = stations.stream().anyMatch(it -> it == upStation);
         boolean isDownStationExisted = stations.stream().anyMatch(it -> it == downStation);
 
@@ -75,14 +79,8 @@ public class Line extends BaseEntity {
             throw new RuntimeException("이미 등록된 구간 입니다.");
         }
 
-        if (!stations.isEmpty() && stations.stream().noneMatch(it -> it == upStation) &&
-            stations.stream().noneMatch(it -> it == downStation)) {
+        if (!isUpStationExisted && !isDownStationExisted) {
             throw new RuntimeException("등록할 수 없는 구간 입니다.");
-        }
-
-        if (stations.isEmpty()) {
-            sections.add(new Section(this, upStation, downStation, distance));
-            return;
         }
 
         if (isUpStationExisted) {
@@ -91,16 +89,16 @@ public class Line extends BaseEntity {
                 .findFirst()
                 .ifPresent(it -> it.updateUpStation(downStation, distance));
 
-            sections.add(new Section(this, upStation, downStation, distance));
-        } else if (isDownStationExisted) {
+            sections.add(section);
+        }
+
+        if (isDownStationExisted) {
             sections.stream()
                 .filter(it -> it.getDownStation() == downStation)
                 .findFirst()
                 .ifPresent(it -> it.updateDownStation(upStation, distance));
 
-            sections.add(new Section(this, upStation, downStation, distance));
-        } else {
-            throw new RuntimeException();
+            sections.add(section);
         }
     }
 
