@@ -71,4 +71,21 @@ public class Sections {
 
 		return downStation;
 	}
+
+	public Optional<Section> findMatchUpStations(Station upStation) {
+		return this.sections.stream()
+			.filter(it -> it.getUpStation() == upStation)
+			.findFirst();
+	}
+
+	public Optional<Section> findMatchDownStation(Station downStation) {
+		return stream()
+			.filter(it -> it.getDownStation() == downStation)
+			.findFirst();
+	}
+
+	public boolean containsStation(Station station) {
+		return this.sections.stream()
+			.anyMatch(s -> s.getUpStation() == station || s.getDownStation() == station);
+	}
 }

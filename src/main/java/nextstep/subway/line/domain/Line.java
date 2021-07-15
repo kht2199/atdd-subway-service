@@ -66,14 +66,13 @@ public class Line extends BaseEntity {
     }
 
     public void addLineStation(Station upStation, Station downStation, int distance) {
-        List<Station> stations = getStations();
         Section section = new Section(this, upStation, downStation, distance);
-        if (stations.isEmpty()) {
+        if (sections.isEmpty()) {
             sections.add(section);
             return;
         }
-        boolean isUpStationExisted = stations.stream().anyMatch(it -> it == upStation);
-        boolean isDownStationExisted = stations.stream().anyMatch(it -> it == downStation);
+        boolean isUpStationExisted = sections.containsStation(upStation);
+        boolean isDownStationExisted = sections.containsStation(downStation);
 
         if (isUpStationExisted && isDownStationExisted) {
             throw new RuntimeException("이미 등록된 구간 입니다.");
@@ -84,16 +83,14 @@ public class Line extends BaseEntity {
         }
 
         if (isUpStationExisted) {
-            sections.stream()
-                .filter(it -> it.getUpStation() == upStation)
-                .findFirst()
+            sections
+                .findMatchUpStations(upStation)
                 .ifPresent(it -> it.updateUpStation(downStation, distance));
         }
 
         if (isDownStationExisted) {
-            sections.stream()
-                .filter(it -> it.getDownStation() == downStation)
-                .findFirst()
+            sections
+                .findMatchDownStation(downStation)
                 .ifPresent(it -> it.updateDownStation(upStation, distance));
         }
         sections.add(section);
