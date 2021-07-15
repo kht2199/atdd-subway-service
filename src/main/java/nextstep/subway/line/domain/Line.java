@@ -101,12 +101,8 @@ public class Line extends BaseEntity {
             throw new RuntimeException();
         }
 
-        Optional<Section> upLineStation = sections.stream()
-            .filter(it -> it.getUpStation() == station)
-            .findFirst();
-        Optional<Section> downLineStation = sections.stream()
-            .filter(it -> it.getDownStation() == station)
-            .findFirst();
+        Optional<Section> upLineStation = sections.findUpStation(station);
+        Optional<Section> downLineStation = sections.findDownStation(station);
 
         if (upLineStation.isPresent() && downLineStation.isPresent()) {
             Station newUpStation = downLineStation.get().getUpStation();

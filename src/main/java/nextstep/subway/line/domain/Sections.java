@@ -3,7 +3,6 @@ package nextstep.subway.line.domain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Embeddable;
@@ -23,10 +22,6 @@ public class Sections {
 
 	public boolean isEmpty() {
 		return this.sections.isEmpty();
-	}
-
-	public Stream<Section> stream() {
-		return sections.stream();
 	}
 
 	public int size() {
@@ -79,7 +74,7 @@ public class Sections {
 	}
 
 	public Optional<Section> findMatchDownStation(Station downStation) {
-		return stream()
+		return this.sections.stream()
 			.filter(it -> it.getDownStation() == downStation)
 			.findFirst();
 	}
@@ -87,5 +82,17 @@ public class Sections {
 	public boolean containsStation(Station station) {
 		return this.sections.stream()
 			.anyMatch(s -> s.getUpStation() == station || s.getDownStation() == station);
+	}
+
+	public Optional<Section> findUpStation(Station station) {
+		return this.sections.stream()
+			.filter(s -> s.getUpStation() == station)
+			.findFirst();
+	}
+
+	public Optional<Section> findDownStation(Station station) {
+		return this.sections.stream()
+			.filter(s -> s.getDownStation() == station)
+			.findFirst();
 	}
 }
