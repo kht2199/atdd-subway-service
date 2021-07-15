@@ -88,8 +88,6 @@ public class Line extends BaseEntity {
                 .filter(it -> it.getUpStation() == upStation)
                 .findFirst()
                 .ifPresent(it -> it.updateUpStation(downStation, distance));
-
-            sections.add(section);
         }
 
         if (isDownStationExisted) {
@@ -97,9 +95,8 @@ public class Line extends BaseEntity {
                 .filter(it -> it.getDownStation() == downStation)
                 .findFirst()
                 .ifPresent(it -> it.updateDownStation(upStation, distance));
-
-            sections.add(section);
         }
+        sections.add(section);
     }
 
     public void removeStation(Station station) {
