@@ -69,51 +69,13 @@ public class Line extends BaseEntity {
 
     public void addLineStation(Station upStation, Station downStation, int distance) {
         Section section = new Section(this, upStation, downStation, distance);
-        if (sections.isEmpty()) {
-            sections.add(section);
-            return;
-        }
-        boolean isUpStationExisted = sections.containsStation(upStation);
-        boolean isDownStationExisted = sections.containsStation(downStation);
-
-        if (isUpStationExisted && isDownStationExisted) {
-            throw new RuntimeException("이미 등록된 구간 입니다.");
-        }
-
-        if (!isUpStationExisted && !isDownStationExisted) {
-            throw new RuntimeException("등록할 수 없는 구간 입니다.");
-        }
-
-        if (isUpStationExisted) {
-            sections
-                .findMatchUpStations(upStation)
-                .ifPresent(it -> it.updateUpStation(downStation, distance));
-        }
-
-        if (isDownStationExisted) {
-            sections
-                .findMatchDownStation(downStation)
-                .ifPresent(it -> it.updateDownStation(upStation, distance));
-        }
-        sections.add(section);
+        sections.addSection(section);
     }
 
     public void removeStation(Station station) {
         if (sections.size() <= 1) {
             throw new RuntimeException();
         }
-
-        Optional<Section> upLineStation = sections.findUpStation(station);
-        Optional<Section> downLineStation = sections.findDownStation(station);
-
-        if (upLineStation.isPresent() && downLineStation.isPresent()) {
-            Station newUpStation = downLineStation.get().getUpStation();
-            Station newDownStation = upLineStation.get().getDownStation();
-            int newDistance = upLineStation.get().getDistance() + downLineStation.get().getDistance();
-            sections.add(new Section(this, newUpStation, newDownStation, newDistance));
-        }
-
-        upLineStation.ifPresent(sections::remove);
-        downLineStation.ifPresent(sections::remove);
+        sections.removeStation(this, station);
     }
 }

@@ -22,20 +22,12 @@ public class Sections {
 		this.sections.add(section);
 	}
 
-	public void add(Section section) {
-		this.sections.add(section);
-	}
-
 	public boolean isEmpty() {
 		return this.sections.isEmpty();
 	}
 
 	public int size() {
 		return this.sections.size();
-	}
-
-	public void remove(Section it) {
-		this.sections.remove(it);
 	}
 
 	public List<Station> orderedStations() {
@@ -96,4 +88,49 @@ public class Sections {
 		return downStation;
 	}
 
+	public void addSection(Section section) {
+		if (sections.isEmpty()) {
+			sections.add(section);
+			return;
+		}
+		Station upStation = section.getUpStation();
+		Station downStation = section.getDownStation();
+		int distance = section.getDistance();
+		boolean isUpStationExisted = containsStation(upStation);
+		boolean isDownStationExisted = containsStation(downStation);
+
+		if (isUpStationExisted && isDownStationExisted) {
+			throw new RuntimeException("이미 등록된 구간 입니다.");
+		}
+
+		if (!isUpStationExisted && !isDownStationExisted) {
+			throw new RuntimeException("등록할 수 없는 구간 입니다.");
+		}
+
+		if (isUpStationExisted) {
+			findMatchUpStations(upStation)
+				.ifPresent(it -> it.updateUpStation(downStation, distance));
+		}
+
+		if (isDownStationExisted) {
+			findMatchDownStation(downStation)
+				.ifPresent(it -> it.updateDownStation(upStation, distance));
+		}
+		sections.add(section);
+	}
+
+	public void removeStation(Line line, Station station) {
+		Optional<Section> upLineStation = findUpStation(station);
+		Optional<Section> downLineStation = findDownStation(station);
+
+		upLineStation.ifPresent(sections::remove);
+		downLineStation.ifPresent(sections::remove);
+
+		if (upLineStation.isPresent() && downLineStation.isPresent()) {
+			Station newUpStation = downLineStation.get().getUpStation();
+			Station newDownStation = upLineStation.get().getDownStation();
+			int newDistance = upLineStation.get().getDistance() + downLineStation.get().getDistance();
+			sections.add(new Section(line, newUpStation, newDownStation, newDistance));
+		}
+	}
 }
