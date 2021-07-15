@@ -16,6 +16,12 @@ public class Sections {
 	@OneToMany(mappedBy = "line", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
 	private final List<Section> sections = new ArrayList<>();
 
+	public Sections() {}
+
+	public Sections(Section section) {
+		this.sections.add(section);
+	}
+
 	public void add(Section section) {
 		this.sections.add(section);
 	}
@@ -48,19 +54,6 @@ public class Sections {
 		return stations;
 	}
 
-	private Station findUpStation() {
-		Station downStation = sections.get(0).getUpStation();
-		while (downStation != null) {
-			Optional<Section> nextLineStation = findDownStation(downStation);
-			if (!nextLineStation.isPresent()) {
-				break;
-			}
-			downStation = nextLineStation.get().getUpStation();
-		}
-
-		return downStation;
-	}
-
 	public Optional<Section> findMatchUpStations(Station upStation) {
 		return this.sections.stream()
 			.filter(it -> it.getUpStation() == upStation)
@@ -89,4 +82,18 @@ public class Sections {
 			.filter(s -> s.getDownStation() == station)
 			.findFirst();
 	}
+
+	private Station findUpStation() {
+		Station downStation = sections.get(0).getUpStation();
+		while (downStation != null) {
+			Optional<Section> nextLineStation = findDownStation(downStation);
+			if (!nextLineStation.isPresent()) {
+				break;
+			}
+			downStation = nextLineStation.get().getUpStation();
+		}
+
+		return downStation;
+	}
+
 }
