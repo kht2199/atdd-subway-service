@@ -17,9 +17,9 @@ public class Line extends BaseEntity {
     @Column(unique = true)
     private String name;
     private String color;
+    @Embedded
+    private Sections sections = new Sections();
 
-    @OneToMany(mappedBy = "line", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-    private List<Section> sections = new ArrayList<>();
 
     public Line() {
     }
@@ -50,10 +50,6 @@ public class Line extends BaseEntity {
 
     public String getColor() {
         return color;
-    }
-
-    public List<Section> getSections() {
-        return sections;
     }
 
     public List<Station> getStations() {
