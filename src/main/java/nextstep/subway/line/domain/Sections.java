@@ -1,6 +1,8 @@
 package nextstep.subway.line.domain;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,19 +33,21 @@ public class Sections {
 	}
 
 	public List<Station> orderedStations() {
-		List<Station> stations = new ArrayList<>();
+		LinkedList<Section> sectionLinkedList = new LinkedList<>(this.sections);
 		Section firstSection = findFirstSection();
+		sectionLinkedList.remove(firstSection);
+		//
+		List<Station> stations = new ArrayList<>();
 		stations.add(firstSection.getUpStation());
 		stations.add(firstSection.getDownStation());
-
-		Section downSection = firstSection;
+		Section currentSection = firstSection;
 		while (true) {
-			Optional<Section> downSectionOptional = findDownSection(downSection);
+			Optional<Section> downSectionOptional = removeDownSection(sectionLinkedList, currentSection);
 			if (!downSectionOptional.isPresent()) {
 				break;
 			}
-			downSection = downSectionOptional.get();
-			stations.add(downSection.getDownStation());
+			currentSection = downSectionOptional.get();
+			stations.add(currentSection.getDownStation());
 		}
 		return stations;
 	}
@@ -74,18 +78,6 @@ public class Sections {
 	public Optional<Section> findDownStation(Station station) {
 		return this.sections.stream()
 			.filter(s -> s.getDownStation() == station)
-			.findFirst();
-	}
-
-	public Optional<Section> findDownSection(Section section) {
-		return this.sections.stream()
-			.filter(s -> s.getUpStation() == section.getDownStation())
-			.findFirst();
-	}
-
-	private Optional<Section> findUpSection(Section section) {
-		return this.sections.stream()
-			.filter(s -> s.getDownStation() == section.getUpStation())
 			.findFirst();
 	}
 
@@ -121,29 +113,54 @@ public class Sections {
 	}
 
 	public void removeStation(Line line, Station station) {
-		Optional<Section> upLineStation = findUpStation(station);
-		Optional<Section> downLineStation = findDownStation(station);
+		Optional<Section> upSection = findUpStation(station);
+		Optional<Section> downSection = findDownStation(station);
 
-		upLineStation.ifPresent(sections::remove);
-		downLineStation.ifPresent(sections::remove);
+		upSection.ifPresent(sections::remove);
+		downSection.ifPresent(sections::remove);
 
-		if (upLineStation.isPresent() && downLineStation.isPresent()) {
-			Station newUpStation = downLineStation.get().getUpStation();
-			Station newDownStation = upLineStation.get().getDownStation();
-			int newDistance = upLineStation.get().getDistance() + downLineStation.get().getDistance();
+		if (upSection.isPresent() && downSection.isPresent()) {
+			Station newUpStation = downSection.get().getUpStation();
+			Station newDownStation = upSection.get().getDownStation();
+			int newDistance = upSection.get().getDistance() + downSection.get().getDistance();
 			sections.add(new Section(line, newUpStation, newDownStation, newDistance));
 		}
 	}
 
 	protected Section findFirstSection() {
-		Section section = sections.get(0);
+		LinkedList<Section> listForPerformance = new LinkedList<>(this.sections);
+		Section section = listForPerformance.remove(0);
 		while (true) {
-			Optional<Section> nextLineStation = findUpSection(section);
-			if (!nextLineStation.isPresent()) {
+			Optional<Section> upSection = removeUpSection(listForPerformance, section);
+			if (!upSection.isPresent()) {
 				return section;
 			}
-			section = nextLineStation.get();
+			section = upSection.get();
 		}
+	}
+
+	protected static Optional<Section> removeDownSection(LinkedList<Section> sections, Section section) {
+		Iterator<Section> iterator = sections.iterator();
+		while(iterator.hasNext()) {
+			Section next = iterator.next();
+			if (section.isDownSection(next)) {
+				iterator.remove();
+				return Optional.of(next);
+			}
+		}
+		return Optional.empty();
+	}
+
+	protected static Optional<Section> removeUpSection(List<Section> sections, Section section) {
+		Iterator<Section> iterator = sections.iterator();
+		while(iterator.hasNext()) {
+			Section next = iterator.next();
+			if (section.isUpSection(next)) {
+				iterator.remove();
+				return Optional.of(next);
+			}
+		}
+		return Optional.empty();
 	}
 
 }
