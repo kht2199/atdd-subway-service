@@ -135,7 +135,7 @@ public class Sections {
 		}
 	}
 
-	private Section findFirstSection() {
+	protected Section findFirstSection() {
 		Section section = sections.get(0);
 		while (true) {
 			Optional<Section> nextLineStation = findUpSection(section);
