@@ -32,16 +32,18 @@ public class Sections {
 
 	public List<Station> orderedStations() {
 		List<Station> stations = new ArrayList<>();
-		Station downStation = findUpStation();
-		stations.add(downStation);
+		Section firstSection = findFirstSection();
+		stations.add(firstSection.getUpStation());
+		stations.add(firstSection.getDownStation());
 
-		while (downStation != null) {
-			Optional<Section> nextLineStation = findUpStation(downStation);
-			if (!nextLineStation.isPresent()) {
+		Section downSection = firstSection;
+		while (true) {
+			Optional<Section> downSectionOptional = findDownSection(downSection);
+			if (!downSectionOptional.isPresent()) {
 				break;
 			}
-			downStation = nextLineStation.get().getDownStation();
-			stations.add(downStation);
+			downSection = downSectionOptional.get();
+			stations.add(downSection.getDownStation());
 		}
 		return stations;
 	}
@@ -75,17 +77,16 @@ public class Sections {
 			.findFirst();
 	}
 
-	private Station findUpStation() {
-		Station downStation = sections.get(0).getUpStation();
-		while (downStation != null) {
-			Optional<Section> nextLineStation = findDownStation(downStation);
-			if (!nextLineStation.isPresent()) {
-				break;
-			}
-			downStation = nextLineStation.get().getUpStation();
-		}
+	public Optional<Section> findDownSection(Section section) {
+		return this.sections.stream()
+			.filter(s -> s.getUpStation() == section.getDownStation())
+			.findFirst();
+	}
 
-		return downStation;
+	private Optional<Section> findUpSection(Section section) {
+		return this.sections.stream()
+			.filter(s -> s.getDownStation() == section.getUpStation())
+			.findFirst();
 	}
 
 	public void addSection(Section section) {
@@ -133,4 +134,16 @@ public class Sections {
 			sections.add(new Section(line, newUpStation, newDownStation, newDistance));
 		}
 	}
+
+	private Section findFirstSection() {
+		Section section = sections.get(0);
+		while (true) {
+			Optional<Section> nextLineStation = findUpSection(section);
+			if (!nextLineStation.isPresent()) {
+				return section;
+			}
+			section = nextLineStation.get();
+		}
+	}
+
 }
