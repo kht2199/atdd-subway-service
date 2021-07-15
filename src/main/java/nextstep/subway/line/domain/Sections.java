@@ -33,16 +33,16 @@ public class Sections {
 	}
 
 	public List<Station> orderedStations() {
-		LinkedList<Section> sectionLinkedList = new LinkedList<>(this.sections);
+		List<Section> sections = new LinkedList<>(this.sections);
 		Section firstSection = findFirstSection();
-		sectionLinkedList.remove(firstSection);
+		sections.remove(firstSection);
 		//
 		List<Station> stations = new ArrayList<>();
 		stations.add(firstSection.getUpStation());
 		stations.add(firstSection.getDownStation());
 		Section currentSection = firstSection;
 		while (true) {
-			Optional<Section> downSectionOptional = removeDownSection(sectionLinkedList, currentSection);
+			Optional<Section> downSectionOptional = removeDownSection(sections, currentSection);
 			if (!downSectionOptional.isPresent()) {
 				break;
 			}
@@ -128,7 +128,7 @@ public class Sections {
 	}
 
 	protected Section findFirstSection() {
-		LinkedList<Section> listForPerformance = new LinkedList<>(this.sections);
+		List<Section> listForPerformance = new LinkedList<>(this.sections);
 		Section section = listForPerformance.remove(0);
 		while (true) {
 			Optional<Section> upSection = removeUpSection(listForPerformance, section);
@@ -139,7 +139,7 @@ public class Sections {
 		}
 	}
 
-	protected static Optional<Section> removeDownSection(LinkedList<Section> sections, Section section) {
+	protected static Optional<Section> removeDownSection(List<Section> sections, Section section) {
 		Iterator<Section> iterator = sections.iterator();
 		while(iterator.hasNext()) {
 			Section next = iterator.next();
