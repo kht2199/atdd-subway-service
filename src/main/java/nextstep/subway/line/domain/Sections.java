@@ -38,10 +38,7 @@ public class Sections {
 		stations.add(downStation);
 
 		while (downStation != null) {
-			Station finalDownStation = downStation;
-			Optional<Section> nextLineStation = sections.stream()
-				.filter(it -> it.getUpStation() == finalDownStation)
-				.findFirst();
+			Optional<Section> nextLineStation = findUpStation(downStation);
 			if (!nextLineStation.isPresent()) {
 				break;
 			}
@@ -54,10 +51,7 @@ public class Sections {
 	private Station findUpStation() {
 		Station downStation = sections.get(0).getUpStation();
 		while (downStation != null) {
-			Station finalDownStation = downStation;
-			Optional<Section> nextLineStation = sections.stream()
-				.filter(it -> it.getDownStation() == finalDownStation)
-				.findFirst();
+			Optional<Section> nextLineStation = findDownStation(downStation);
 			if (!nextLineStation.isPresent()) {
 				break;
 			}
